@@ -1,52 +1,122 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
 using BOS.DAMS.Client.ClientModels;
 using BOS.DAMS.Client.Responses;
+using Newtonsoft.Json;
 
 namespace BOS.DAMS.Client
 {
     public class DAMSClient : IDAMSClient
     {
-        public Task<AddAssetResponse> AddAssetAsync<T>(IAsset asset, Guid collectionId) where T : IAsset
+        private readonly HttpClient _httpClient;
+
+        public DAMSClient(HttpClient httpClient)
         {
-            throw new NotImplementedException();
+            _httpClient = httpClient;
         }
 
-        public Task<AddAssetToCollectionResponse> AddAssetToCollectionAsync(Guid assetId, Guid collectionId)
+        public async Task<AddAssetResponse> AddAssetAsync<T>(IAsset asset, Guid collectionId) where T : IAsset
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.PostAsJsonAsync("Assets?api-version=1.0", asset).ConfigureAwait(false);
+
+            return new AddAssetResponse(response.StatusCode);
         }
 
-        public Task<AddCollectionResponse> AddCollectionAsync<T>(IDAMSCollection collection) where T : IDAMSCollection
+        public async Task<AddAssetToCollectionResponse> AddAssetToCollectionAsync(Guid assetId, Guid collectionId)
         {
-            throw new NotImplementedException();
+            var payload = new { assetId };
+            var response = await _httpClient.PostAsJsonAsync($"Collections({collectionId.ToString()})/AddAssetToCollection?api-version=1.0", payload).ConfigureAwait(false);
+
+            return new AddAssetToCollectionResponse(response.StatusCode);
         }
 
-        public Task<DeleteAssetResponse> DeleteAssetByIdAsync(Guid assetId)
+        public async Task<AddCollectionResponse<T>> AddCollectionAsync<T>(IDAMSCollection collection) where T : IDAMSCollection
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.PostAsJsonAsync("Collections?api-version=1.0", collection).ConfigureAwait(false);
+
+            var addCollectionResponse = new AddCollectionResponse<T>(response.StatusCode);
+
+            addCollectionResponse.Collection = addCollectionResponse.IsSuccessStatusCode ? JsonConvert.DeserializeObject<T>(response.Content.ReadAsStringAsync().Result) : default(T);
+
+            return addCollectionResponse;
         }
 
-        public Task<DeleteCollectionResponse> DeleteCollectionByIdAsync(Guid collectionId)
+        public async Task<DeleteAssetResponse> DeleteAssetByIdAsync(Guid assetId)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.DeleteAsync($"/Assets?key={assetId.ToString()}?api-version=1.0");
+            return new DeleteAssetResponse(response.StatusCode);
         }
 
-        public Task<GetAssetByIdResponse<T>> GetAssetByIdAsync<T>(Guid assetId) where T : IAsset
+        public async Task<DeleteCollectionResponse> DeleteCollectionByIdAsync(Guid collectionId)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.DeleteAsync($"Collections?key={collectionId.ToString()}?api-version=1.0");
+            return new DeleteCollectionResponse(response.StatusCode);
         }
 
-        public Task<GetCollectionByIdResponse<T>> GetCollectionByIdAsync<T>(Guid collectionId, bool includeAssets = true, bool filterDeleted = true) where T : IDAMSCollection
+        public async Task<GetAssetByIdResponse<T>> GetAssetByIdAsync<T>(Guid assetId) where T : IAsset
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.GetAsync($"Assets({assetId.ToString()})?api-version=1.0");
+            var getAssetByIdResponse = new GetAssetByIdResponse<T>(response.StatusCode);
+
+            getAssetByIdResponse.Asset = getAssetByIdResponse.IsSuccessStatusCode ? JsonConvert.DeserializeObject<T>(response.Content.ReadAsStringAsync().Result) : default(T);
+            return getAssetByIdResponse;
         }
 
-        public Task<GetCollectionsResponse<T>> GetCollectionsAsync<T>(bool includeAssets = false, bool filterDeleted = true) where T : IDAMSCollection
+        public async Task<GetCollectionByIdResponse<T>> GetCollectionByIdAsync<T>(Guid collectionId, bool includeAssets = true, bool filterDeleted = true) where T : IDAMSCollection
         {
-            throw new NotImplementedException();
+
+            var response = new HttpResponseMessage();
+
+            if (includeAssets && filterDeleted)
+            {
+                response = await _httpClient.GetAsync($"Collections({collectionId.ToString()})?$expand=Assets($filter=Deleted eq false)&api-version=1.0").ConfigureAwait(false);
+            }
+            else if (includeAssets && !filterDeleted)
+            {
+                response = await _httpClient.GetAsync($"Collections({collectionId.ToString()})?$expand=Assets&api-version=1.0").ConfigureAwait(false);
+            }
+            else if (!includeAssets && filterDeleted)
+            {
+                response = await _httpClient.GetAsync($"Collections({collectionId.ToString()})?api-version=1.0").ConfigureAwait(false);
+            }
+            else
+            {
+                response = await _httpClient.GetAsync($"Collections({collectionId.ToString()})?api-version=1.0").ConfigureAwait(false);
+            }
+
+            var getCollectionByIdResponse = new GetCollectionByIdResponse<T>(response.StatusCode);
+            getCollectionByIdResponse.Collection = getCollectionByIdResponse.IsSuccessStatusCode ? JsonConvert.DeserializeObject<T>(response.Content.ReadAsStringAsync().Result) : default(T);
+
+            return getCollectionByIdResponse;
+        }
+
+        public async Task<GetCollectionsResponse<T>> GetCollectionsAsync<T>(bool includeAssets = false, bool filterDeleted = true) where T : IDAMSCollection
+        {
+            var response = new HttpResponseMessage();
+
+            if (includeAssets && filterDeleted)
+            {
+                response = await _httpClient.GetAsync("Collections?$filter=Deleted eq false&expand=Assets($filter=Deleted eq false)&api-version=1.0").ConfigureAwait(false);
+            }
+            else if (includeAssets && !filterDeleted)
+            {
+                response = await _httpClient.GetAsync("Collections?$expand=Assets&api-version=1.0").ConfigureAwait(false);
+            }
+            else if (!includeAssets && filterDeleted)
+            {
+                response = await _httpClient.GetAsync("Collections?$filter=Deleted eq false&api-version=1.0").ConfigureAwait(false);
+            }
+            else
+            {
+                response = await _httpClient.GetAsync("Collections?api-version=1.0").ConfigureAwait(false);
+            }
+
+            var getCollectionsResponse = new GetCollectionsResponse<T>(response.StatusCode);
+
+            getCollectionsResponse.Collections = getCollectionsResponse.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<T>>(response.Content.ReadAsStringAsync().Result) : new List<T>();
+            return getCollectionsResponse;
         }
 
         public Task<RemoveAssetFromCollectionResponse> RemoveAssetFromCollectionAsync(Guid assetId, Guid collectionId)
