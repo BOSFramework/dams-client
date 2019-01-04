@@ -117,7 +117,8 @@ namespace BOS.DAMS.Client
             var getCollectionsResponse = new GetCollectionsResponse<T>(response.StatusCode);
 
             JObject json = JsonConvert.DeserializeObject<JObject>(response.Content.ReadAsStringAsync().Result);
-            getCollectionsResponse.Collections = getCollectionsResponse.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<T>>(json["value"].ToString()) : new List<T>();
+            getCollectionsResponse.Collections = getCollectionsResponse.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<T>>(json["value"].ToString(), 
+                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto }) : new List<T>();
             return getCollectionsResponse;
         }
 
