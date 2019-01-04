@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using BOS.DAMS.Client.ClientModels;
 using BOS.DAMS.Client.Responses;
@@ -42,9 +43,13 @@ namespace BOS.DAMS.Client
 
         public async Task<AddCollectionResponse<T>> AddCollectionAsync<T>(IDAMSCollection collection) where T : IDAMSCollection
         {
+            var request = new HttpRequestMessage(new HttpMethod("POST"), $"{_httpClient.BaseAddress}Collections?api-version=1.0");
+            request.Content = new StringContent(JsonConvert.SerializeObject(collection), Encoding.UTF8, "application/json");
+            var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+
             var payload = JObject.Parse(collection.ToString());
            // var payload = JsonConvert.SerializeObject(collection, new JsonSerializerSettings() { ContractResolver = _contractResolver, Formatting = Formatting.None }).ToString();
-            var response = await _httpClient.PostAsJsonAsync("Collections?api-version=1.0", payload).ConfigureAwait(false);
+            // var response = await _httpClient.PostAsync("Collections?api-version=1.0", payload).ConfigureAwait(false);
 
             var addCollectionResponse = new AddCollectionResponse<T>(response.StatusCode);
 
