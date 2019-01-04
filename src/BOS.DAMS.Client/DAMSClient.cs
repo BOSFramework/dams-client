@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using BOS.DAMS.Client.ClientModels;
 using BOS.DAMS.Client.Responses;
+using BOS.DAMS.Client.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -93,7 +94,7 @@ namespace BOS.DAMS.Client
             return getCollectionByIdResponse;
         }
 
-        public async Task<GetCollectionsResponse<T>> GetCollectionsAsync<T>(bool includeAssets = false, bool filterDeleted = true) where T : IDAMSCollection
+        public async Task<GetCollectionsResponse<T>> GetCollectionsAsync<T, T2>(bool includeAssets = false, bool filterDeleted = true) where T : IDAMSCollection where T2 : IAsset
         {
             var response = new HttpResponseMessage();
 
@@ -115,10 +116,12 @@ namespace BOS.DAMS.Client
             }
 
             var getCollectionsResponse = new GetCollectionsResponse<T>(response.StatusCode);
+            
+            
 
             JObject json = JsonConvert.DeserializeObject<JObject>(response.Content.ReadAsStringAsync().Result);
-            getCollectionsResponse.Collections = getCollectionsResponse.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<T>>(json["value"].ToString(), 
-                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto }) : new List<T>();
+            getCollectionsResponse.Collections = getCollectionsResponse.IsSuccessStatusCode ? 
+                JsonConvert.DeserializeObject<List<T>>(json["value"].ToString(), new DynamicJsonConverter<T2>()) : new List<T>();
             return getCollectionsResponse;
         }
 
