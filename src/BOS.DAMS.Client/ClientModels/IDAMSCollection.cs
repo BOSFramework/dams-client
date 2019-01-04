@@ -9,7 +9,7 @@ namespace BOS.DAMS.Client.ClientModels
         Guid Id { get; set; }
         string Name { get; set; }
         string Description { get; set; }
-        List<A> Assets { get; set; }
+        List<IAsset> Assets { get; set; }
         bool Deleted { get; set; }
     }
 }
