@@ -17,7 +17,7 @@ namespace BOS.DAMS.Client
             _httpClient = httpClient;
         }
 
-        public async Task<AddAssetResponse> AddAssetAsync<T>(IAsset asset, Guid collectionId) where T : IAsset
+        public async Task<AddAssetResponse> AddAssetAsync<T>(IAsset asset) where T : IAsset
         {
             var response = await _httpClient.PostAsJsonAsync("Assets?api-version=1.0", asset).ConfigureAwait(false);
 
