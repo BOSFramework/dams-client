@@ -28,7 +28,9 @@ namespace BOS.DAMS.Client
 
         public async Task<AddAssetResponse> AddAssetAsync<T>(IAsset asset) where T : IAsset
         {
-            var response = await _httpClient.PostAsJsonAsync("Assets?api-version=1.0", asset).ConfigureAwait(false);
+            var request = new HttpRequestMessage(new HttpMethod("POST"), $"{_httpClient.BaseAddress}Assets?api-version=1.0");
+            request.Content = new StringContent(JsonConvert.SerializeObject(asset, new JsonSerializerSettings() { ContractResolver = _contractResolver, Formatting = Formatting.Indented }), Encoding.UTF8, "application/json");
+            var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
 
             return new AddAssetResponse(response.StatusCode);
         }
@@ -46,9 +48,6 @@ namespace BOS.DAMS.Client
             var request = new HttpRequestMessage(new HttpMethod("POST"), $"{_httpClient.BaseAddress}Collections?api-version=1.0");
             request.Content = new StringContent(JsonConvert.SerializeObject(collection, new JsonSerializerSettings() { ContractResolver = _contractResolver, Formatting = Formatting.Indented }), Encoding.UTF8, "application/json");
             var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
-
-            //var payload = JsonConvert.SerializeObject(collection, new JsonSerializerSettings() { ContractResolver = _contractResolver, Formatting = Formatting.Indented });
-            //var response = await _httpClient.PostAsJsonAsync("Collections?api-version=1.0", payload).ConfigureAwait(false);
 
             var addCollectionResponse = new AddCollectionResponse<T>(response.StatusCode);
 
@@ -145,13 +144,17 @@ namespace BOS.DAMS.Client
 
         public async Task<UpdateAssetResponse> UpdateAssetAsync<T>(IAsset asset) where T : IAsset
         {
-            var response = await _httpClient.PutAsJsonAsync($"Assets({asset.Id.ToString()})?api-version=1.0", asset);
+            var request = new HttpRequestMessage(new HttpMethod("POST"), $"{_httpClient.BaseAddress}Assets({asset.Id.ToString()})?api-version=1.0");
+            request.Content = new StringContent(JsonConvert.SerializeObject(asset, new JsonSerializerSettings() { ContractResolver = _contractResolver, Formatting = Formatting.Indented }), Encoding.UTF8, "application/json");
+            var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
             return new UpdateAssetResponse(response.StatusCode);
         }
 
         public async Task<UpdateCollectionResponse> UpdateCollectionAsync<T>(IDAMSCollection collection) where T : IDAMSCollection
         {
-            var response = await _httpClient.PutAsJsonAsync($"Collections({collection.Id})?api-version=1.0", collection);
+            var request = new HttpRequestMessage(new HttpMethod("PUT"), $"{_httpClient.BaseAddress}Collections({collection.Id.ToString()})?api-version=1.0");
+            request.Content = new StringContent(JsonConvert.SerializeObject(collection, new JsonSerializerSettings() { ContractResolver = _contractResolver, Formatting = Formatting.Indented }), Encoding.UTF8, "application/json");
+            var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
             return new UpdateCollectionResponse(response.StatusCode);
         }
     }
