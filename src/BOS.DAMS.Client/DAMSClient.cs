@@ -7,16 +7,22 @@ using BOS.DAMS.Client.Responses;
 using BOS.DAMS.Client.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace BOS.DAMS.Client
 {
     public class DAMSClient : IDAMSClient
     {
         private readonly HttpClient _httpClient;
+        private readonly DefaultContractResolver _contractResolver;
 
         public DAMSClient(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            _contractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            };
         }
 
         public async Task<AddAssetResponse> AddAssetAsync<T>(IAsset asset) where T : IAsset
@@ -36,7 +42,8 @@ namespace BOS.DAMS.Client
 
         public async Task<AddCollectionResponse<T>> AddCollectionAsync<T>(IDAMSCollection collection) where T : IDAMSCollection
         {
-            var response = await _httpClient.PostAsJsonAsync("Collections?api-version=1.0", collection).ConfigureAwait(false);
+            var payload = JsonConvert.SerializeObject(collection, new JsonSerializerSettings() { ContractResolver = _contractResolver, Formatting = Formatting.Indented });
+            var response = await _httpClient.PostAsJsonAsync("Collections?api-version=1.0", payload).ConfigureAwait(false);
 
             var addCollectionResponse = new AddCollectionResponse<T>(response.StatusCode);
 
