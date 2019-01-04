@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BOS.DAMS.Client.ClientModels;
 using BOS.DAMS.Client.Responses;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace BOS.DAMS.Client
 {
@@ -115,8 +116,8 @@ namespace BOS.DAMS.Client
 
             var getCollectionsResponse = new GetCollectionsResponse<T>(response.StatusCode);
 
-            getCollectionsResponse.Collections = getCollectionsResponse.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<T>>(response.Content.ReadAsStringAsync().Result
-                , new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto }) : new List<T>();
+            JObject json = JsonConvert.DeserializeObject<JObject>(response.Content.ReadAsStringAsync().Result);
+            getCollectionsResponse.Collections = getCollectionsResponse.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<T>>(json["value"].ToString()) : new List<T>();
             return getCollectionsResponse;
         }
 
