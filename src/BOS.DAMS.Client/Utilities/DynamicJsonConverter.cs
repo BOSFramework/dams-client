@@ -21,7 +21,7 @@ namespace BOS.DAMS.Client.Utilities
             }
             else if (reader.TokenType == JsonToken.StartObject)
             {
-                return serializer.Deserialize(reader);
+                return serializer.Deserialize<T>(reader);
 
                 //existingValue = existingValue ?? serializer.ContractResolver.ResolveContract(objectType).DefaultCreator();
                 //serializer.Populate(reader, existingValue);
