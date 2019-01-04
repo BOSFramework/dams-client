@@ -1,15 +1,18 @@
-﻿using System;
+﻿using BOS.DAMS.Client.ClientModels;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
 
 namespace BOS.DAMS.Client.Responses
 {
-    public class AddAssetResponse : BOSWebServiceResponse
+    public class AddAssetResponse<T> : BOSWebServiceResponse
     {
+        public T Asset { get; set; }
+        public List<DAMSError> Errors { get; set; }
+
         public AddAssetResponse(HttpStatusCode statusCode) 
             : base(statusCode)
         {
+            Errors = new List<DAMSError>();
         }
     }
 }

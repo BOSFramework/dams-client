@@ -10,7 +10,7 @@ namespace BOS.DAMS.Client
     public interface IDAMSClient
     {
         Task<AddCollectionResponse<T>> AddCollectionAsync<T>(IDAMSCollection collection) where T : IDAMSCollection;
-        Task<AddAssetResponse> AddAssetAsync<T>(IAsset asset) where T : IAsset;
+        Task<AddAssetResponse<T>> AddAssetAsync<T>(IAsset asset) where T : IAsset;
         Task<GetAssetByIdResponse<T>> GetAssetByIdAsync<T>(Guid assetId) where T : IAsset;
         Task<AddAssetToCollectionResponse> AddAssetToCollectionAsync(Guid assetId, Guid collectionId);
         Task<RemoveAssetFromCollectionResponse> RemoveAssetFromCollectionAsync(Guid assetId, Guid collectionId);
