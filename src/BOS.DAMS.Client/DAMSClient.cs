@@ -144,7 +144,7 @@ namespace BOS.DAMS.Client
 
         public async Task<UpdateAssetResponse> UpdateAssetAsync<T>(IAsset asset) where T : IAsset
         {
-            var request = new HttpRequestMessage(new HttpMethod("POST"), $"{_httpClient.BaseAddress}Assets({asset.Id.ToString()})?api-version=1.0");
+            var request = new HttpRequestMessage(new HttpMethod("PUT"), $"{_httpClient.BaseAddress}Assets({asset.Id.ToString()})?api-version=1.0");
             request.Content = new StringContent(JsonConvert.SerializeObject(asset, new JsonSerializerSettings() { ContractResolver = _contractResolver, Formatting = Formatting.Indented }), Encoding.UTF8, "application/json");
             var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
             return new UpdateAssetResponse(response.StatusCode);
