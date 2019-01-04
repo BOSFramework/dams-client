@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BOS.DAMS.Client.Utilities
 {
-    public class DynamicJsonConverter<T> : JsonConverter
+    public class DynamicAssetJsonConverter<T> : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
@@ -22,10 +22,6 @@ namespace BOS.DAMS.Client.Utilities
             else if (reader.TokenType == JsonToken.StartObject)
             {
                 return serializer.Deserialize<T>(reader);
-
-                //existingValue = existingValue ?? serializer.ContractResolver.ResolveContract(objectType).DefaultCreator();
-                //serializer.Populate(reader, existingValue);
-                //return existingValue;
             }
             else if (reader.TokenType == JsonToken.Null)
             {

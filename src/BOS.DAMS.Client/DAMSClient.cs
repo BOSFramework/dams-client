@@ -66,7 +66,7 @@ namespace BOS.DAMS.Client
             return getAssetByIdResponse;
         }
 
-        public async Task<GetCollectionByIdResponse<T>> GetCollectionByIdAsync<T>(Guid collectionId, bool includeAssets = true, bool filterDeleted = true) where T : IDAMSCollection
+        public async Task<GetCollectionByIdResponse<T>> GetCollectionByIdAsync<T, T2>(Guid collectionId, bool includeAssets = true, bool filterDeleted = true) where T : IDAMSCollection where T2 : IAsset
         {
 
             var response = new HttpResponseMessage();
@@ -89,8 +89,10 @@ namespace BOS.DAMS.Client
             }
 
             var getCollectionByIdResponse = new GetCollectionByIdResponse<T>(response.StatusCode);
-            getCollectionByIdResponse.Collection = getCollectionByIdResponse.IsSuccessStatusCode ? JsonConvert.DeserializeObject<T>(response.Content.ReadAsStringAsync().Result) : default(T);
 
+            JObject json = JsonConvert.DeserializeObject<JObject>(response.Content.ReadAsStringAsync().Result);
+            getCollectionByIdResponse.Collection = getCollectionByIdResponse.IsSuccessStatusCode ?
+                JsonConvert.DeserializeObject<T>(json["value"].ToString(), new DynamicAssetJsonConverter<T2>()) : default(T);
             return getCollectionByIdResponse;
         }
 
@@ -116,12 +118,10 @@ namespace BOS.DAMS.Client
             }
 
             var getCollectionsResponse = new GetCollectionsResponse<T>(response.StatusCode);
-            
-            
 
             JObject json = JsonConvert.DeserializeObject<JObject>(response.Content.ReadAsStringAsync().Result);
             getCollectionsResponse.Collections = getCollectionsResponse.IsSuccessStatusCode ? 
-                JsonConvert.DeserializeObject<List<T>>(json["value"].ToString(), new DynamicJsonConverter<T2>()) : new List<T>();
+                JsonConvert.DeserializeObject<List<T>>(json["value"].ToString(), new DynamicAssetJsonConverter<T2>()) : new List<T>();
             return getCollectionsResponse;
         }
 
