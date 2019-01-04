@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace BOS.DAMS.Client.ServiceExtension
@@ -14,7 +15,11 @@ namespace BOS.DAMS.Client.ServiceExtension
                 throw new NullReferenceException("BOS API Key must not be null or empty.");
             }
 
-            services.AddHttpClient<IDAMSClient, DAMSClient>();
+            services.AddHttpClient<IDAMSClient, DAMSClient>(client =>
+            {
+                client.BaseAddress = new Uri("https://apis.dev.bosframework.com/dams/odata/");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            });
         }
     }
 }
