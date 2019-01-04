@@ -16,7 +16,7 @@ namespace BOS.DAMS.Client
         Task<RemoveAssetFromCollectionResponse> RemoveAssetFromCollectionAsync(Guid assetId, Guid collectionId);
         Task<UpdateAssetResponse> UpdateAssetAsync<T>(IAsset asset) where T : IAsset;
         Task<DeleteAssetResponse> DeleteAssetByIdAsync(Guid assetId);
-        Task<GetCollectionByIdResponse<T>> GetCollectionByIdAsync<T>(Guid collectionId, bool includeAssets = true, bool filterDeleted = true) where T : IDAMSCollection;
+        Task<GetCollectionByIdResponse<T>> GetCollectionByIdAsync<T, T2>(Guid collectionId, bool includeAssets = true, bool filterDeleted = true) where T : IDAMSCollection where T2 : IAsset;
         Task<GetCollectionsResponse<T>> GetCollectionsAsync<T, T2>(bool includeAssets = false, bool filterDeleted = true) where T : IDAMSCollection where T2 : IAsset;
         Task<UpdateCollectionResponse> UpdateCollectionAsync<T>(IDAMSCollection collection) where T : IDAMSCollection;
         Task<DeleteCollectionResponse> DeleteCollectionByIdAsync(Guid collectionId);
