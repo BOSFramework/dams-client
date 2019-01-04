@@ -42,7 +42,8 @@ namespace BOS.DAMS.Client
 
         public async Task<AddCollectionResponse<T>> AddCollectionAsync<T>(IDAMSCollection collection) where T : IDAMSCollection
         {
-            var payload = JsonConvert.SerializeObject(collection, new JsonSerializerSettings() { ContractResolver = _contractResolver, Formatting = Formatting.None }).ToString();
+            var payload = JObject.Parse(collection.ToString());
+           // var payload = JsonConvert.SerializeObject(collection, new JsonSerializerSettings() { ContractResolver = _contractResolver, Formatting = Formatting.None }).ToString();
             var response = await _httpClient.PostAsJsonAsync("Collections?api-version=1.0", payload).ConfigureAwait(false);
 
             var addCollectionResponse = new AddCollectionResponse<T>(response.StatusCode);
