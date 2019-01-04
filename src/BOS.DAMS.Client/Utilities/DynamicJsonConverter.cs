@@ -19,11 +19,13 @@ namespace BOS.DAMS.Client.Utilities
             {
                 return JsonConvert.DeserializeObject<T>(reader.Value.ToString());
             }
-            else if (reader.TokenType == JsonToken.StartArray)
+            else if (reader.TokenType == JsonToken.StartObject)
             {
-                existingValue = existingValue ?? serializer.ContractResolver.ResolveContract(objectType).DefaultCreator();
-                serializer.Populate(reader, existingValue);
-                return existingValue;
+                return serializer.Deserialize(reader);
+
+                //existingValue = existingValue ?? serializer.ContractResolver.ResolveContract(objectType).DefaultCreator();
+                //serializer.Populate(reader, existingValue);
+                //return existingValue;
             }
             else if (reader.TokenType == JsonToken.Null)
             {
