@@ -90,9 +90,8 @@ namespace BOS.DAMS.Client
 
             var getCollectionByIdResponse = new GetCollectionByIdResponse<T>(response.StatusCode);
 
-            JObject json = JsonConvert.DeserializeObject<JObject>(response.Content.ReadAsStringAsync().Result);
             getCollectionByIdResponse.Collection = getCollectionByIdResponse.IsSuccessStatusCode ?
-                JsonConvert.DeserializeObject<T>(json["value"].ToString(), new DynamicAssetJsonConverter<T2>()) : default(T);
+                JsonConvert.DeserializeObject<T>(response.Content.ReadAsStringAsync().Result, new DynamicAssetJsonConverter<T2>()) : default(T);
             return getCollectionByIdResponse;
         }
 
