@@ -119,19 +119,23 @@ namespace BOS.DAMS.Client
             return getCollectionsResponse;
         }
 
-        public Task<RemoveAssetFromCollectionResponse> RemoveAssetFromCollectionAsync(Guid assetId, Guid collectionId)
+        public async Task<RemoveAssetFromCollectionResponse> RemoveAssetFromCollectionAsync(Guid assetId, Guid collectionId)
         {
-            throw new NotImplementedException();
+            var payload = new { assetId };
+            var response = await _httpClient.PostAsJsonAsync($"Collections({collectionId.ToString()})/RemoveAssetFromCollection", payload);
+            return new RemoveAssetFromCollectionResponse(response.StatusCode);
         }
 
-        public Task<UpdateAssetResponse> UpdateAssetAsync<T>(IAsset asset) where T : IAsset
+        public async Task<UpdateAssetResponse> UpdateAssetAsync<T>(IAsset asset) where T : IAsset
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.PutAsJsonAsync($"Assets({asset.Id.ToString()})?api-version=1.0", asset);
+            return new UpdateAssetResponse(response.StatusCode);
         }
 
-        public Task<UpdateCollectionResponse> UpdateCollectionAsync<T>(IDAMSCollection collection) where T : IDAMSCollection
+        public async Task<UpdateCollectionResponse> UpdateCollectionAsync<T>(IDAMSCollection collection) where T : IDAMSCollection
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.PutAsJsonAsync($"Collections({collection.Id})?api-version=1.0", collection);
+            return new UpdateCollectionResponse(response.StatusCode);
         }
     }
 }
