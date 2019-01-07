@@ -57,7 +57,7 @@ public class MyAsset : IAsset
 }
 
 // Create a new user and then extend the properties of you custom user onto it.
-AddAssetResponse<MyAsset> myNewRoleResponse = _dams_Client.AddAssetAsync<MyAsset>(new MyAsset());
+AddAssetResponse<MyAsset> myNewAssetResponse = _dams_Client.AddAssetAsync<MyAsset>(new MyAsset());
 ```
 
 ### Important Notes
